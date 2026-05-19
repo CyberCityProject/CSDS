@@ -185,7 +185,7 @@ A lightweight but powerful cybersecurity architecture designed for sovereignty, 
 
 # Screenshots
 
-Coming soon.
+look at folder.
 
 ---
 
