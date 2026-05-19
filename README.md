@@ -1,3 +1,10 @@
+<p align="center">
+
+<img src="docs/banner.gif">
+
+</p>
+
+
 # CSDS
 Cyber Security Daemon System
 
