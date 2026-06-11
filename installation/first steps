@@ -10,6 +10,7 @@ Download latest Slackware distro from official repo :  https://mirrors.slackware
 install as usual ext4 partitions and swap.( recommended size 100G for the Lab)
 update & upgrade distro .  Important : after upgrade the kernel will be be updated . Bash LILO -V to update LILO . if not , LILO will not boot.
 create a user and apply root privilège
+create a directory : mkdir -p /opt/cybercity
 
 2. Kali Linux or equivalent for penetration testing 
 Download latest kali  distro from official repo : https://www.kali.org/get-kali
