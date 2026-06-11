@@ -1,1 +1,26 @@
 
+First Steps :
+
+to make and test CSDS before any production , you need to create a virtual Lab with Virtual Box , VMware or proxmox ,... with 4 VM. 
+VM's must be in the same LAN and Network adaptater must be set as Promiscuity mode Allow All
+
+1. CSDS ( slackWare distro  )
+
+Download latest Slackware distro from official repo :  https://mirrors.slackware.com/slackware/slackware-iso/
+install as usual ext4 partitions and swap.( recommended size 100G for the Lab)
+update & upgrade distro .  Important : after upgrade the kernel will be be updated . Bash LILO -V to update LILO . if not , LILO will not boot.
+create a user and apply root privilège
+
+2. Kali Linux or equivalent for penetration testing 
+Download latest kali  distro from official repo : https://www.kali.org/get-kali
+install as usual ext4 partitions and swap.( recommended size 40G for the Lab )
+
+3 . Windows Server 2022 or 2025 evaluation release ( no activation key needed for the lab)
+Download latest from official repo : https://www.microsoft.com//evalcenter
+install as usual NTFS partition ( recommended size 40G for the Lab )
+install services ( AD , LDAP , DNS , IIS , RDP , ... )
+
+4.Ubuntu Server
+Download latest ubuntu distro from official repo : https://ubuntu.com/download/server
+install as usual ext4 partitions and swap.( recommended size 40G for the Lab )
+update & upgrade distro then install services
