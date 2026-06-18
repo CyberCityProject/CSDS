@@ -1,1 +1,87 @@
-this repo contains zeek sripts  
+this repo contains zeek sripts  ( changelog 06/18/2026 ) 
+
+
+# CSDS — Detection Engines (overview)
+
+A **passive** network sensor built on Zeek. Each engine assigns a threat score
+to the source IP; above **50**, the IP is automatically blocked (`block_ip.sh`
+via iptables). Trusted hosts (`cybercity_whitelist.zeek`) are excluded from all
+scoring.
+
+---
+
+## ntlm_relay_detect.zeek — NTLM Relay Detection (V1.9)
+
+Detects **NTLM relay** attacks (e.g. `ntlmrelayx`) by identifying the pivot
+pattern: a host that **receives** an inbound NTLM authentication and then
+**forwards** it to a target (inbound + outbound correlated within a time window).
+
+- **Detection:** listener → outbound correlation over SMB sessions.
+- **Victim / relay distinction:** only the confirmed pivot is scored; the victim
+  and legitimate SMB servers (e.g. a domain controller simply receiving a
+  connection) are **not** penalized.
+- **Score:** +80 (confirmed relay), with multi-target / HTTP→SMB / LDAP variants.
+- **Validated:** Kali blocked, victim preserved, no false positive on the DC
+  during a `secretsdump`.
+
+---
+
+## pth_detect.zeek — Pass-the-Hash / NTLM Lateral Movement (V2.1)
+
+Detects **Pass-the-Hash** and lateral movement via NTLM authentication. Designed
+to **survive SMB3 encryption**: it relies on the cleartext NTLM session setup,
+not on the (encrypted) SMB payload.
+
+- **Lateral movement:** a source authenticating via NTLM to ≥ 2 distinct hosts
+  → +60 (blocks).
+- **Privileged NTLM auth:** an administrator account over NTLM (when Kerberos is
+  expected) → +45 (suspicious).
+- **Cleartext bonus:** if SMB is not encrypted, full psexec/atexec signature
+  detection (`ADMIN$` + `svcctl`/`atsvc` pipe) → +70.
+- **Validated:** admin auth +45, lateral movement +60 (score 105, blocked),
+  cleartext path confirmed against an unencrypted Samba server.
+
+> See `NOTE_TECHNIQUE_SMB3_Detection_Passive.pdf` for the analysis of the limit
+> SMB3 encryption imposes on any passive network detection.
+
+---
+
+## scan_detect.zeek — Port Scan Detection (V2.0)
+
+Detects port scanning using a **threshold**, not a single connection (which would
+mistake a simple `net use` for a scan).
+
+- **Vertical scan:** ≥ 3 distinct sensitive ports from one source → +15.
+- **Horizontal scan (sweep):** same port across ≥ 4 distinct hosts → +20.
+- **Monitored ports:** 21, 22, 23, 445, 3389.
+- **Robustness:** deduplication via global tables (resistant to double script
+  loading).
+- **Validated:** no more false positive on legitimate connections; `nmap`
+  detected.
+
+---
+
+## beacon_detect.zeek — C2 Beacon Detection (V2.0)
+
+Detects command-and-control **beaconing** through statistical analysis of
+connection **regularity** (RITA-style), instead of a fixed interval window.
+
+- **Method:** collects inter-arrival intervals per (source, destination, port);
+  a beacon is flagged when the coefficient of variation (stddev / mean) ≤ 0.25
+  over ≥ 6 connections.
+- **Coverage:** any regular interval (5 s to 30 min), tolerating jitter up to
+  ~25%.
+- **Score:** +50 (blocks). Reports the estimated interval and measured jitter.
+- **Validated:** ~29 s beacon detected (8% jitter); legitimate polling from a
+  trusted host correctly ignored (whitelist).
+
+---
+
+## Support files
+
+| File | Role |
+|------|------|
+| `cybercity_whitelist.zeek` | Trusted IPs excluded from scoring |
+| `threat_score.zeek` | Score accumulation + auto-block at ≥ 50 |
+| `cybercity_alerts.zeek` | Notice (alert) types |
+| `correlation_globals.zeek` | Shared globals across engines (correlation) |
